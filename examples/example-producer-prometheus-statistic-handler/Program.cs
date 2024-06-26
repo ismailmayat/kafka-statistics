@@ -27,7 +27,11 @@ namespace Com.Rfranco.TestKafkaStatistics
                 }
 
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                ProducerBuilder<Null, string> builder = new ProducerBuilder<Null, string>(configuration.GetSection("producerConf").Get<ProducerConfig>());
+                var config = configuration.GetSection("producerConf").Get<ProducerConfig>();
+
+                config.Debug = "broker,topic,msg";
+                
+                ProducerBuilder<Null, string> builder = new ProducerBuilder<Null, string>(config);
                 builder.SetErrorHandler((_, error) =>
                 {
                     Console.WriteLine($"An error ocurred producing the event: {error.Reason}");
@@ -38,9 +42,9 @@ namespace Com.Rfranco.TestKafkaStatistics
                 builder.SetKeySerializer(Serializers.Null);
                 builder.SetValueSerializer(Serializers.Utf8);
 
-
                 using (var producer = builder.Build())
                 {
+                    
                     Action<DeliveryReport<Null, string>> handler = r =>
                     {
                         if (r.Error.IsError)
